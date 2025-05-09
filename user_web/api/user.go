@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"mall_api/user_web/global"
 	"mall_api/user_web/global/response"
 	"net/http"
 	"time"
@@ -49,12 +50,9 @@ func HandleGrpcErrorToHttp(err error, c *gin.Context) {
 }
 
 func GetUserList(ctx *gin.Context) {
-	ip := "127.0.0.1"
-	port := 50051
-
 	//连接用户grpc服务器
 	userConn, err := grpc.NewClient(
-		fmt.Sprintf("%s:%d", ip, port),
+		fmt.Sprintf("%s:%d", global.ServerConfig.UserSrvInfo.Host, global.ServerConfig.UserSrvInfo.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
