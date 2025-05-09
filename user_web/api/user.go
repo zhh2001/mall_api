@@ -2,10 +2,11 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"mall_api/user_web/global"
-	"mall_api/user_web/global/response"
+	"github.com/go-playground/validator/v10"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,9 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
+	"mall_api/user_web/forms"
+	"mall_api/user_web/global"
+	"mall_api/user_web/global/response"
 	"mall_api/user_web/proto"
 )
 
@@ -49,6 +53,20 @@ func HandleGrpcErrorToHttp(err error, c *gin.Context) {
 	}
 }
 
+func HandleValidatorError(ctx *gin.Context, err error) {
+	var errs validator.ValidationErrors
+	ok := errors.As(err, &errs)
+	if !ok {
+		ctx.JSON(http.StatusOK, gin.H{
+			"msg": err.Error(),
+		})
+	}
+	ctx.JSON(http.StatusBadRequest, gin.H{
+		"error": errs.Error(),
+	})
+	return
+}
+
 func GetUserList(ctx *gin.Context) {
 	//连接用户grpc服务器
 	userConn, err := grpc.NewClient(
@@ -63,9 +81,14 @@ func GetUserList(ctx *gin.Context) {
 	//生成grpc的client并调用接口
 	userSrvClient := proto.NewUserClient(userConn)
 
+	pn := ctx.DefaultQuery("pn", "0")
+	pnInt, err := strconv.Atoi(pn)
+	pSize := ctx.DefaultQuery("psize", "10")
+	pSizeInt, err := strconv.Atoi(pSize)
+
 	rsp, err := userSrvClient.GetUserList(context.Background(), &proto.PageInfo{
-		Pn:    0,
-		PSize: 0,
+		Pn:    uint32(pnInt),
+		PSize: uint32(pSizeInt),
 	})
 	if err != nil {
 		zap.S().Errorw("[GetUserList] 查询【用户列表】失败")
@@ -95,5 +118,13 @@ func GetUserList(ctx *gin.Context) {
 		result = append(result, user)
 	}
 	ctx.JSON(http.StatusOK, result)
+}
 
+func PasswordLogin(ctx *gin.Context) {
+	//表单验证
+	passwordLoginForm := forms.PasswordLoginForm{}
+	if err := ctx.ShouldBind(&passwordLoginForm); err != nil {
+		HandleValidatorError(ctx, err)
+		return
+	}
 }
