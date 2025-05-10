@@ -134,6 +134,13 @@ func PasswordLogin(ctx *gin.Context) {
 		return
 	}
 
+	if !store.Verify(passwordLoginForm.CaptchaId, passwordLoginForm.Captcha, true) {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"captcha": "验证码错误",
+		})
+		return
+	}
+
 	//连接用户grpc服务器
 	userConn, err := grpc.NewClient(
 		fmt.Sprintf("%s:%d", global.ServerConfig.UserSrvInfo.Host, global.ServerConfig.UserSrvInfo.Port),

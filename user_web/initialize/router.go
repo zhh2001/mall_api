@@ -14,6 +14,7 @@ func Routers() *gin.Engine {
 
 	ApiGroup := Router.Group("/u/v1")
 	router2.InitUserRouter(ApiGroup)
+	router2.InitBaseRouter(ApiGroup)
 
 	return Router
 }
