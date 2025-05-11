@@ -7,3 +7,12 @@ user_srv:
 
 jwt:
   key: 'hTMHLwQFh^aLiyS8X&xvb7@zhNccyE$2'
+
+sms:
+  key: "xxxx"
+  secret: "xxx"
+  expire: 300
+
+redis:
+  host: '10.120.21.77'
+  port: 6379
