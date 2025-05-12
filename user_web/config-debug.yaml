@@ -4,6 +4,7 @@ port: 8021
 user_srv:
   host: '127.0.0.1'
   port: 50051
+  name: 'user_srv'
 
 jwt:
   key: 'hTMHLwQFh^aLiyS8X&xvb7@zhNccyE$2'
@@ -16,3 +17,7 @@ sms:
 redis:
   host: '10.120.21.77'
   port: 6379
+
+consul:
+  host: "10.120.21.77"
+  port: 8500

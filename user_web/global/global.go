@@ -1,7 +1,11 @@
 package global
 
-import "mall_api/user_web/config"
+import (
+	"mall_api/user_web/config"
+	"mall_api/user_web/proto"
+)
 
 var (
-	ServerConfig = &config.ServerConfig{}
+	ServerConfig  = &config.ServerConfig{}
+	UserSrvClient proto.UserClient
 )
