@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"mall_api/user_web/utils"
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
 	"mall_api/user_web/global"
@@ -24,6 +26,16 @@ func main() {
 
 	//4.初始化srv的连接
 	initialize.InitSrvConn()
+
+	viper.AutomaticEnv()
+	// 如果是本地开发环境，端口号固定
+	debug := viper.GetBool("MALL_DEBUG")
+	if !debug {
+		port, err := utils.GetFreePort()
+		if err == nil {
+			global.ServerConfig.Port = port
+		}
+	}
 
 	//注册验证器
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
