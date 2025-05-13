@@ -1,12 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/nacos-group/nacos-sdk-go/v2/clients"
 	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
+
+	"mall_api/user_web/config"
 )
 
 func main() {
@@ -37,16 +40,21 @@ func main() {
 	}
 
 	content, err := configClient.GetConfig(vo.ConfigParam{
-		DataId: "user-web.yaml",
+		DataId: "user-web.json",
 		Group:  "dev"},
 	)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(content)
-
+	serverConfig := config.ServerConfig{}
+	err = json.Unmarshal([]byte(content), &serverConfig)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(serverConfig)
 	err = configClient.ListenConfig(vo.ConfigParam{
-		DataId: "user-web.yaml",
+		DataId: "user-web.json",
 		Group:  "dev",
 		OnChange: func(namespace, group, dataId, data string) {
 			fmt.Println("配置文件产生变化")
