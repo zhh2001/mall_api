@@ -12,5 +12,6 @@ func InitGoodsRouter(Router *gin.RouterGroup) {
 	{
 		GoodsRouter.GET("", goods.List)
 		GoodsRouter.POST("", middlewares.JWTAuth(), middlewares.IsAdminAuth(), goods.New) // 该接口需要管理员权限
+		GoodsRouter.GET("/:id", goods.Detail)                                             // 获取商品详情
 	}
 }
