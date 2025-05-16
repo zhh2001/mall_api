@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/satori/go.uuid"
 	"github.com/spf13/viper"
@@ -63,7 +66,19 @@ func main() {
 		3. S函数和L函数很有用，提供了一个全局的安全访问logger的途径
 	*/
 	zap.S().Debugf("启动服务器，端口：%d", global.ServerConfig.Port)
-	if err := Router.Run(fmt.Sprintf(":%d", global.ServerConfig.Port)); err != nil {
-		zap.S().Panic("启动失败：", err.Error())
+	go func() {
+		if err := Router.Run(fmt.Sprintf(":%d", global.ServerConfig.Port)); err != nil {
+			zap.S().Panic("启动失败：", err.Error())
+		}
+	}()
+
+	// 接收终止信号
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	if err = registerClient.Deregister(serviceId); err != nil {
+		zap.S().Panic("注销失败:", err.Error())
+	} else {
+		zap.S().Info("注销成功")
 	}
 }
