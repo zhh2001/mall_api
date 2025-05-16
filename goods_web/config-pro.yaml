@@ -1,13 +1,7 @@
-# Nacos
 host: '10.120.21.77'
 port: 8848
-namespace: '73bb8093-63eb-4bf3-bd81-84b18fe259d6'
+namespace: 'f374f527-8993-4d43-bc3e-9ae73d08ee13'
 user: 'nacos'
 password: 'nacos'
-data_id: 'user-web.json'
+data_id: 'goods-web.json'
 group: 'pro'
-
-name: 'user-web'
-goods_srv:
-  host: '127.0.0.1'
-  port: 50051

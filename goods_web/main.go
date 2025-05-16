@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"mall_api/goods_web/utils"
 
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
 	"mall_api/goods_web/global"
 	"mall_api/goods_web/initialize"
+	"mall_api/goods_web/utils"
 )
 
 func main() {
@@ -21,7 +21,12 @@ func main() {
 	//3.初始化routers
 	Router := initialize.Routers()
 
-	//4.初始化srv的连接
+	//4.初始化翻译
+	if err := initialize.InitTrans("zh"); err != nil {
+		panic(err)
+	}
+
+	//5.初始化srv的连接
 	initialize.InitSrvConn()
 
 	viper.AutomaticEnv()
