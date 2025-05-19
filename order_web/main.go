@@ -6,6 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -14,6 +16,7 @@ import (
 	"mall_api/order_web/initialize"
 	"mall_api/order_web/utils"
 	"mall_api/order_web/utils/register/consul"
+	myvalidator "mall_api/order_web/validator"
 )
 
 func main() {
@@ -42,6 +45,11 @@ func main() {
 		if err == nil {
 			global.ServerConfig.Port = port
 		}
+	}
+
+	//注册验证器
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		_ = v.RegisterValidation("mobile", myvalidator.ValidateMobile)
 	}
 
 	registerClient := consul.NewRegistryClient(
