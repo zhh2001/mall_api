@@ -8,9 +8,10 @@ import (
 )
 
 var (
-	Trans          ut.Translator
-	ServerConfig   = &config.ServerConfig{}
-	NacosConfig    = &config.NacosConfig{}
-	GoodsSrvClient proto.GoodsClient
-	OrderSrvClient proto.OrderClient
+	Trans              ut.Translator
+	ServerConfig       = &config.ServerConfig{}
+	NacosConfig        = &config.NacosConfig{}
+	GoodsSrvClient     proto.GoodsClient
+	OrderSrvClient     proto.OrderClient
+	InventorySrvClient proto.InventoryClient
 )
