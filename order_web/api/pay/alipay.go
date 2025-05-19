@@ -1,34 +1,53 @@
-package main
+package pay
 
 import (
-	"fmt"
+	"context"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 	"github.com/smartwalle/alipay/v3"
+	"go.uber.org/zap"
+
+	"mall_api/order_web/global"
+	"mall_api/order_web/proto"
 )
 
-func main() {
-	appID := "app_id"
-	privateKey := "private_key"
-	aliPublicKey := "ali_public_key"
-	var client, err = alipay.New(appID, privateKey, false)
+func Notify(ctx *gin.Context) {
+	// 支付宝回调通知
+	client, err := alipay.New(
+		global.ServerConfig.AlipayInfo.AppID,
+		global.ServerConfig.AlipayInfo.PrivateKey,
+		false,
+	)
 	if err != nil {
-		panic(err)
+		zap.S().Errorw("实例化支付宝失败")
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": err.Error(),
+		})
+		return
 	}
-	err = client.LoadAliPayPublicKey(aliPublicKey)
+	err = client.LoadAliPayPublicKey(global.ServerConfig.AlipayInfo.AliPublicKey)
 	if err != nil {
-		panic(err)
+		zap.S().Errorw("加载支付宝的公钥失败")
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": err.Error(),
+		})
+		return
 	}
 
-	var p = alipay.TradePagePay{}
-	p.NotifyURL = "http://10.120.221.149:8023/o/v1/pay/alipay/notify"
-	p.ReturnURL = "http://10.120.221.149:8089/o/v1/pay/alipay/return"
-	p.Subject = "MALL-订单支付"
-	p.OutTradeNo = "zhang_sues"
-	p.TotalAmount = "10.00"
-	p.ProductCode = "FAST_INSTANT_TRADE_PAY"
-
-	url, err := client.TradePagePay(p)
+	notification, err := client.DecodeNotification(ctx.Request.Form)
 	if err != nil {
-		panic(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{})
+		return
 	}
-	fmt.Println(url.String())
+
+	_, err = global.OrderSrvClient.UpdateOrderStatus(context.Background(), &proto.OrderStatus{
+		OrderSn: notification.OutTradeNo,
+		Status:  string(notification.TradeStatus),
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+	ctx.String(http.StatusOK, "success")
 }
