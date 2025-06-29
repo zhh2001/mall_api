@@ -34,6 +34,9 @@ func main() {
 	//5.初始化srv的连接
 	initialize.InitSrvConn()
 
+	//6.初始化Sentinel
+	initialize.InitSentinel()
+
 	viper.AutomaticEnv()
 	// 如果是本地开发环境，端口号固定
 	debug := viper.GetBool("MALL_DEBUG")

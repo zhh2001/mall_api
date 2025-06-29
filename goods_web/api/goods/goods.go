@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
+	sentinel "github.com/alibaba/sentinel-golang/api"
+	"github.com/alibaba/sentinel-golang/core/base"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
@@ -113,6 +115,15 @@ func List(ctx *gin.Context) {
 	request.Brand = int32(brandIdInt)
 
 	// 请求商品的service服务
+	e, b := sentinel.Entry("goods-list", sentinel.WithTrafficType(base.Inbound))
+	if b != nil {
+		ctx.JSON(http.StatusTooManyRequests, gin.H{
+			"msg": "请求过于频繁，请稍后重试",
+		})
+		return
+	} else {
+		e.Exit()
+	}
 	r, err := global.GoodsSrvClient.GoodsList(context.Background(), request)
 	if err != nil {
 		zap.S().Errorf("[List] 查询【商品列表】失败：%s", err.Error())
